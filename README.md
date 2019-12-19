@@ -14,13 +14,13 @@
 
 `python create_dataset.py`
 
-3.a Save statistical summary features:
+3.1 Save statistical summary features:
 
 `python feature_saver.py`
 
 or
 
-3.b Save MFCC features:
+3.2 Save MFCC features:
 
 `python get_mfcc.py` - This creates HDF5 files which are used for training.
 
@@ -40,10 +40,11 @@ or
 `python linear_imagenet_classifier.py`
  
 7. Visualize learned models:
-7a. Gradient Ascent:
+
+7.1 Gradient Ascent:
 `python grad_ascent.py`
 
-7b. Top activation retrieval:
+7.2 Top activation retrieval:
 `python activ_retrieval.py`
 
 
