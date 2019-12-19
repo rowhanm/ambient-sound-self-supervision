@@ -2,6 +2,7 @@
 
 0. Install requirements from `requirements.txt`
 0.1. Install ffmpeg - https://ffmpeg.org/download.html
+0.2. Download pretrained weights - https://drive.google.com/drive/folders/1dqdUiZIlkR3SiaK8tayLaUR0WejKqsct?usp=sharing
 
 1. Download AudioSet
 
