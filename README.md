@@ -1,6 +1,8 @@
 # Implementation of "Ambient Sound Provides Supervision for Visual Learning" using PyTorch
 
-### Full report can be read in the PDF - "Improving_Visual_Recognition_using_Ambient_Sound_for_Supervision.pdf"
+#### Full report can be read in the PDF - "Improving_Visual_Recognition_using_Ambient_Sound_for_Supervision.pdf"
+
+#### Original paper can be found - https://arxiv.org/pdf/1608.07017.pdf
 
 0. Install requirements from `requirements.txt`
 
