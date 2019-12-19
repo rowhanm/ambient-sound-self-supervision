@@ -1,3 +1,8 @@
+Implementation of "Ambient Sound Provides Supervision for Visual Learning" using PyTorch
+
+0. Install requirements from `requirements.txt`
+0.1. Install ffmpeg - https://ffmpeg.org/download.html
+
 1. Download AudioSet
 
 `cat eval_segments.csv | ./download.sh`
