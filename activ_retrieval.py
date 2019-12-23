@@ -1,9 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[34]:
-
-
 import os
 from scipy.ndimage.filters import gaussian_filter
 import sys
@@ -18,30 +12,23 @@ import torchvision.datasets as datasets
 from shutil import copyfile
 
 
-# In[2]:
+import itertools
+import cv2
 
-
-sys.path.append("../deepcluster/")
 import models
 
 
-# In[166]:
-
-
-device = torch.device('cuda')
+device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 pretext_cluster_size = 60
-data = "/scratch/work/public/imagenet/train/"
-conv = 5
-model_path = "./ambient-alexnet-model_60.pt"
-arch = "alexnet"
+
+data = sys.argv[1]
+conv = int(sys.argv[4])
+model_path = sys.argv[3]
+arch = sys.argv[2]
 count = 9
 
-
-# In[167]:
-
-
-checkpoint = torch.load(model_path)
 model = models.__dict__[arch](sobel=False, out=pretext_cluster_size)
+checkpoint = torch.load(model_path)
 def rename_key(key):
     if not 'module' in key:
         return key
@@ -53,37 +40,16 @@ checkpoint = {rename_key(key): val
 model.load_state_dict(checkpoint)
 
 
-# In[168]:
-
-
-model.cuda()
+model.to(device)
 for params in model.parameters():
     params.requires_grad = False
 model.eval();
 
-
-# In[169]:
-
-
-repo = os.path.join("./visuals", 'conv' + str(conv))
+repo = os.path.join(sys.argv[5], 'conv' + str(conv))
 if not os.path.isdir(repo):
     os.makedirs(repo)
 
-
-# In[ ]:
-
-
-#######
-
-
-# In[121]:
-
-
 normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],std=[0.229, 0.224, 0.225])
-
-
-# In[122]:
-
 
 tra = [transforms.Resize(256),
        transforms.CenterCrop(224),
@@ -91,38 +57,13 @@ tra = [transforms.Resize(256),
        normalize]
 
 
-# In[123]:
-
-
 dataset = datasets.ImageFolder(data, transform=transforms.Compose(tra))
 
-
-# In[154]:
-
-
-subs = list(range(0, len(dataset)//10))
-
-
-# In[155]:
-
+subs = list(range(0, len(dataset)//10)) # Run on 1/10th of the dataset
 
 subset = torch.utils.data.Subset(dataset, subs)
 
-
-# In[156]:
-
-
 dataloader = torch.utils.data.DataLoader(subset, batch_size=256, num_workers=4)
-
-
-# In[157]:
-
-
-len(dataloader)
-
-
-# In[132]:
-
 
 def forward(model, my_layer, x):
     layer = 1
@@ -139,21 +80,7 @@ def forward(model, my_layer, x):
                 layer = layer + 1
     return res
 
-
-# In[133]:
-
-
-#######
-
-
-# In[170]:
-
-
 layers_activations = {}
-
-
-# In[171]:
-
 
 for i, (input_tensor, _) in enumerate(dataloader):
     input_var = torch.autograd.Variable(input_tensor.cuda(), volatile=True)
@@ -172,14 +99,6 @@ for i, (input_tensor, _) in enumerate(dataloader):
     if i % 100 == 0:
         print('{0}/{1}'.format(i, len(dataloader)))
 
-
-# In[172]:
-
-
-import itertools
-import cv2
-import os
-import numpy as np
 for filt in layers_activations:
     repofilter = os.path.join(repo, filt)
     if not os.path.isdir(repofilter):
@@ -221,23 +140,3 @@ for filt in layers_activations:
     resized = cv2.resize(imgmatrix, (mat_x//3,mat_y//3), interpolation = cv2.INTER_AREA)
     compression_params = [cv2.IMWRITE_JPEG_QUALITY, 90]
     cv2.imwrite(name, resized, compression_params)
-
-
-# In[36]:
-
-
-import IPython.display as ipd
-ipd.Image("visuals/conv1/layer1-channel75.jpeg")
-
-
-# In[37]:
-
-
-ipd.Image("visuals/conv1/layer1-channel75/combined.jpg")
-
-
-# In[ ]:
-
-
-
-

@@ -1,3 +1,5 @@
+#### Modified from https://github.com/facebookresearch/deepcluster/
+
 import math
 
 import numpy as np

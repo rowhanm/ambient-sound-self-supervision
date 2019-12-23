@@ -1,5 +1,8 @@
 # Implementation of "Ambient Sound Provides Supervision for Visual Learning" using PyTorch
 
+<img src="./combined1.jpg">
+<img src="./combined3.jpg">
+
 ### Full report can be read in the PDF - "Improving_Visual_Recognition_using_Ambient_Sound_for_Supervision.pdf"
 
 0. Install requirements from `requirements.txt`
@@ -47,7 +50,9 @@ or
 `python grad_ascent.py`
 
 7.2 Top activation retrieval:
-`python activ_retrieval.py`
+`python activ_retrieval.py dataset_path pretext_model_arch pretext_model_path conv_layer(1/2/3/4/5) output_location`
+E.g, `python activ_retrieval.py /path/to/imagenet alexnet /path/to/model.pth 5 /path/to/output`
+
 
 
 Authors: Rohan Mahadev, Florence Lu
