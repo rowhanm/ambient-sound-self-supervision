@@ -1,8 +1,29 @@
 # Implementation of "Ambient Sound Provides Supervision for Visual Learning" using PyTorch
 
-<img src="./combined1.jpg">
-<img src="./combined3.jpg">
-#### Full report can be read in the PDF - "Improving_Visual_Recognition_using_Ambient_Sound_for_Supervision.pdf"
+
+<style>
+.column {
+  float: left;
+  width: 33.33%;
+  padding: 5px;
+}
+
+/* Clear floats after image containers */
+.row::after {
+  content: "";
+  clear: both;
+  display: table;
+}
+</style>
+
+<div class="row">
+<div class="column">
+<img src="./combined1.jpg" style="width:100%">
+</div>
+<div class="column">
+<img src="./combined3.jpg" style="width:100%">
+</div>
+</div> 
 
 #### Original paper can be found - https://arxiv.org/pdf/1608.07017.pdf
 
