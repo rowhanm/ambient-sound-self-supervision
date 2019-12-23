@@ -1,29 +1,8 @@
 # Implementation of "Ambient Sound Provides Supervision for Visual Learning" using PyTorch
 
 
-<style>
-.column {
-  float: left;
-  width: 33.33%;
-  padding: 5px;
-}
-
-/* Clear floats after image containers */
-.row::after {
-  content: "";
-  clear: both;
-  display: table;
-}
-</style>
-
-<div class="row">
-<div class="column">
-<img src="./combined1.jpg" style="width:100%">
-</div>
-<div class="column">
-<img src="./combined3.jpg" style="width:100%">
-</div>
-</div> 
+<img src="./combined1.jpg" style="width:100%;float:left">
+<img src="./combined3.jpg" style="width:100%;float:left">
 
 #### Original paper can be found - https://arxiv.org/pdf/1608.07017.pdf
 
