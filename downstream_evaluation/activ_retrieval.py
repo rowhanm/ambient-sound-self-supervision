@@ -11,11 +11,10 @@ import torchvision.transforms as transforms
 import torchvision.datasets as datasets
 from shutil import copyfile
 
-
 import itertools
 import cv2
 
-import models
+import utils.models
 
 
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')

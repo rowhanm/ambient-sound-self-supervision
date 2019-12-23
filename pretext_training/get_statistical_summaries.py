@@ -1,13 +1,10 @@
-import multisensory.aolib.util as ut
-import multisensory.aolib.sound as sound
-from matplotlib.pyplot import imshow
-from PIL import Image
+import os
+import utils.aolib_util as ut
+import utils.sound as sound
 import numpy as np
 import scipy.signal
-import IPython.display as ipd
-import torchvision
-import torch
-from torch import nn
+import sys
+from utils import data_cleaner
 
 def subbands_from_sound(signal, filts):
     ft_signal = np.fft.rfft(signal)
@@ -20,7 +17,6 @@ def sound_from_subbands(subbands, filts):
     ft = filts * ft_subbands
     ift = np.fft.irfft(ft, axis = 0)
     return np.sum(ift, axis = 1)
-
 
 def freq2erb(freq_hz):
     return 9.265*np.log(1+freq_hz/(24.7*9.265))
@@ -232,21 +228,22 @@ def texture_stats(envs, sr, normalize_envs = False):
     
     return env_mu, env_stdev_norm, corrs, mod_pow_norm, loudness
     
-import os
     
 def extract_textures(audio_dir):
     #Magic numbers
+    # These were set after reading lots and lots and lots of papers
+    # and millions of combinations
     fps = 29.97
     samp_sr = 21000.
     frame_dur = 1/fps
     shift_dur = 4.2
     ds_sr = 20000
     env_sr = 400
-    #result_array = np.empty((0, 502))
+    result_array = np.empty((0,502))
     for filename in os.listdir(audio_dir):
         if filename.endswith(".wav"):
             print(filename)
-            if (os.path.isfile("./dataset/features/"+filename+".npy")):
+            if (os.path.isfile(sys.argv[2]+"/"+filename+".npy")):
                 print("skipping "+filename)
             else:
                 try:
@@ -254,9 +251,48 @@ def extract_textures(audio_dir):
                     sub_envs = subband_envs(snd, nbands=30, ds_sr=ds_sr, env_sr=env_sr)
                     a = texture_stats(sub_envs, sr=env_sr)
                     sound_textures = np.concatenate((a[0], a[1], a[2], a[3].ravel(), np.atleast_1d(a[4])), axis=0)
-                    np.save('./dataset/features/'+filename+'.npy', sound_textures)
+                    # np.save(sys.argv[2]+"/"+filename+'.npy', sound_textures)
+                    result_array = np.append(result_array, [sound_textures], axis=0)
                 except Exception:
                     print("something wrong with "+filename)
                     pass
+    return result_array
 
-extract_textures('./dataset/audio')
+results = extract_textures(sys.argv[1])
+
+path_to_feats = sys.argv[2]
+number_of_clusters = int(sys.argv[3])
+
+
+# Run KMeans
+
+kmeans = KMeans(n_clusters=number_of_clusters).fit(results)
+
+# Generate CSV file with labels
+
+myfile = open(sys.argv[2] + '/stat_feats_k'+str(number_of_clusters)+'.csv', 'w')
+for i in range(len(audio_names)):
+    myfile.write(audio_names[i][:-4]+".jpg,"+str(kmeans.labels_[i])+"\n")
+myfile.close()
+
+#Shuffle CSV file
+
+os.system('shuf '+path_to_feats+'/stat_feats_k'+str(number_of_clusters)+'.csv > '+path_to_feats+'/stat_feats_k'+str(number_of_clusters)+'_shuf.csv')
+
+# Split file into train and validation CSV
+
+number_of_valid_samples = 5208 # Change as per your need 
+
+os.system('awk \'NR < '+str(number_of_valid_samples)+' { print >> "'+path_to_feats+'/val_stat_feats_k'+str(number_of_clusters)+'.csv"; next } {print >> "'+path_to_feats+'/train_stat_feats_k'+str(number_of_clusters)+'.csv" }\' '+path_to_feats+'/stat_feats_k'+str(number_of_clusters)+'_shuf.csv')
+
+# 3. Create Trainable Dataset
+
+train_df, val_df = data_cleaner.clean_dataset(path_to_feats+"/train_stat_feats_k"+str(number_of_clusters)+".csv", path_to_feats+"/val_stat_feats_k"+str(number_of_clusters)+".csv")
+
+data_cleaner.create_h5(train_df, val_df, path_to_feats+"/train_stat_feats_k"+str(number_of_clusters)+".hdf5", path_to_feats+"/val_stat_feats_k"+str(number_of_clusters)+".hdf5")
+
+
+
+
+
+

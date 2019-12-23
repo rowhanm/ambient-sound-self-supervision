@@ -1,6 +1,4 @@
 import sys
-sys.path.append("../deepcluster/")
-
 import argparse
 import os
 import math
@@ -18,20 +16,16 @@ import torchvision.transforms as transforms
 import torch.backends.cudnn as cudnn
 device = torch.device('cuda')
 
-import models
+import utils.models
 
 from sklearn import metrics
 from PIL import Image
 from PIL import ImageFile
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
-from util import AverageMeter, load_model
+from ft_util import AverageMeter, load_model
 
 normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],std=[0.229, 0.224, 0.225])
-
-
-from util import AverageMeter, load_model
-from eval_linear import accuracy
 
 fc6_8 = True
 train_batchnorm = False
@@ -42,7 +36,20 @@ if sys.argv[1] == "all":
 
 pretext_cluster_size = int(sys.argv[2])
 
+def accuracy(output, target, topk=(1,)):
+    """Computes the precision@k for the specified values of k"""
+    maxk = max(topk)
+    batch_size = target.size(0)
 
+    _, pred = output.topk(maxk, 1, True, True)
+    pred = pred.t()
+    correct = pred.eq(target.view(1, -1).expand_as(pred))
+
+    res = []
+    for k in topk:
+        correct_k = correct[:k].view(-1).float().sum(0, keepdim=True)
+        res.append(correct_k.mul_(100.0 / batch_size))
+    return res
 
 def train(loader, model, optimizer, criterion, fc6_8, losses, it=0, total_iterations=None, stepsize=None, verbose=True):
     # to log
@@ -212,7 +219,7 @@ optimizer = torch.optim.SGD(
 
 criterion = nn.BCEWithLogitsLoss(reduction='none')
 
-dataset = VOC2007_dataset("/scratch/rm5310/myjupyter/CV_SSL/voc/VOCdevkit/VOC2007", split="trainval", transform=transforms.Compose([
+dataset = VOC2007_dataset(sys.argv[4], split="trainval", transform=transforms.Compose([
             transforms.RandomHorizontalFlip(),
             transforms.RandomResizedCrop(224, scale=(0.1, 0.5), ratio=(1, 1)),
             transforms.ToTensor(),
@@ -248,7 +255,7 @@ transform_eval = [
 ]
 
 print('Train set')
-train_dataset = VOC2007_dataset("/scratch/rm5310/myjupyter/CV_SSL/voc/VOCdevkit/VOC2007", split="trainval", transform=transforms.Compose(transform_eval))
+train_dataset = VOC2007_dataset(sys.argv[4], split="trainval", transform=transforms.Compose(transform_eval))
 train_loader = torch.utils.data.DataLoader(
     train_dataset,
     batch_size=1,
@@ -260,7 +267,7 @@ evaluate(train_loader, alexnet, eval_random_crops=True)
 
 
 print('Test set')
-test_dataset = VOC2007_dataset("/scratch/rm5310/myjupyter/CV_SSL/voc/VOCdevkit/VOC2007", split='test', transform=transforms.Compose(transform_eval))
+test_dataset = VOC2007_dataset(sys.argv[4], split='test', transform=transforms.Compose(transform_eval))
 test_loader = torch.utils.data.DataLoader(
     test_dataset,
     batch_size=1,

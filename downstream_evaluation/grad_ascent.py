@@ -1,9 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[1]:
-
-
 import os
 from scipy.ndimage.filters import gaussian_filter
 import sys
@@ -16,15 +10,7 @@ import torchvision
 import torchvision.transforms as transforms
 
 
-# In[2]:
-
-
-sys.path.append("../deepcluster/")
-import models
-
-
-# In[28]:
-
+import utils.models
 
 device = torch.device('cuda')
 pretext_cluster_size = 60
@@ -37,9 +23,6 @@ sigma = 0.3
 step = 5
 niter = 50000
 CONV = {'alexnet': [96, 256, 384, 384, 256]}
-
-
-# In[29]:
 
 
 checkpoint = torch.load(model_path)
@@ -55,16 +38,10 @@ checkpoint = {rename_key(key): val
 model.load_state_dict(checkpoint)
 
 
-# In[30]:
-
-
 model.cuda()
 for params in model.parameters():
     params.requires_grad = False
 model.eval();
-
-
-# In[31]:
 
 
 def deprocess_image(x):
@@ -83,9 +60,6 @@ def deprocess_image(x):
     x = x.transpose((1, 2, 0))
     x = np.clip(x, 0, 255).astype('uint8')
     return x
-
-
-# In[32]:
 
 
 def gradient_ascent(f):
@@ -128,9 +102,6 @@ def gradient_ascent(f):
             Image.fromarray(a).save(fname_out)
 
 
-# In[33]:
-
-
 def forward(model, layer, channel, x):
     count = 0
     for y, m in enumerate(model.features.modules()):
@@ -148,30 +119,10 @@ def forward(model, layer, channel, x):
                 count = count + 1
 
 
-# In[34]:
-
-
 repo = os.path.join("./visuals", 'conv' + str(conv))
 if not os.path.isdir(repo):
     os.makedirs(repo)
 
 
-# In[35]:
-
-
 for i in range(CONV[arch][conv-1]):
     gradient_ascent(i)
-
-
-# In[ ]:
-
-
-import IPython.display as ipd
-ipd.Image("visuals/conv1/layer1-channel0.jpeg")
-
-
-# In[ ]:
-
-
-
-

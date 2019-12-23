@@ -1,11 +1,4 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[1]:
-
-
 import sys
-sys.path.append("../deepcluster/")
 
 import torch
 import torchvision
@@ -16,7 +9,7 @@ import argparse
 import os
 import time
 
-import models
+import utils.models
 import numpy as np
 import torch.nn as nn
 import torch.backends.cudnn as cudnn
@@ -26,10 +19,7 @@ import torchvision.datasets as datasets
 from torch.utils.data.sampler import SubsetRandomSampler
 
 
-from util import AverageMeter, learning_rate_decay, load_model, Logger
-
-
-# In[20]:
+from ft_util import AverageMeter, learning_rate_decay, load_model, Logger
 
 
 model_path = sys.argv[2]
@@ -42,9 +32,6 @@ batch_size = 128
 lr = 0.01
 momentum = 0.9
 wd = -4
-
-
-# In[3]:
 
 
 best_prec1 = 0
@@ -62,35 +49,17 @@ alexnet.load_state_dict(checkpoint)
 alexnet.cuda()
 cudnn.benchmark = True
 
-
-# In[4]:
-
-
 # freeze the features layers
 for param in alexnet.features.parameters():
     param.requires_grad = False
 
-
-# In[5]:
-
-
 criterion = nn.CrossEntropyLoss().cuda()
-
-
-# In[6]:
-
 
 dataset_path = os.path.join("/scratch/work/public/imagenet", 'train')
 
 
-# In[7]:
-
-
 normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                  std=[0.229, 0.224, 0.225])
-
-
-# In[8]:
 
 
 transformations_val = [
@@ -98,20 +67,11 @@ transformations_val = [
             transforms.TenCrop(224),
             transforms.Lambda(lambda crops: torch.stack([normalize(transforms.ToTensor()(crop)) for crop in crops])),
         ]
-
-
-# In[9]:
-
-
 transformations_train = [transforms.Resize(256),
                              transforms.CenterCrop(256),
                              transforms.RandomCrop(224),
-#                              transforms.RandomHorizontalFlip(),
                              transforms.ToTensor(),
                              normalize]
-
-
-# In[10]:
 
 
 dataset = datasets.ImageFolder(
@@ -120,15 +80,9 @@ dataset = datasets.ImageFolder(
     )
 
 
-# In[11]:
-
-
 validation_split = .2
 shuffle_dataset = True
 random_seed= 42
-
-
-# In[12]:
 
 
 dataset_size = len(dataset)
@@ -140,9 +94,6 @@ if shuffle_dataset :
 train_indices, val_indices = indices[split:], indices[:split]
 
 
-# In[21]:
-
-
 train_sampler = SubsetRandomSampler(train_indices)
 valid_sampler = SubsetRandomSampler(val_indices)
 
@@ -150,9 +101,6 @@ train_loader = torch.utils.data.DataLoader(dataset, batch_size=batch_size,
                                            sampler=train_sampler, num_workers=8, pin_memory=True)
 validation_loader = torch.utils.data.DataLoader(dataset, batch_size=batch_size,
                                                 sampler=valid_sampler)
-
-
-# In[14]:
 
 
 class RegLog(nn.Module):
@@ -183,9 +131,6 @@ class RegLog(nn.Module):
         return self.linear(x)
 
 
-# In[16]:
-
-
 # logistic regression
 reglog = RegLog(conv, len(dataset.classes)).cuda()
 optimizer = torch.optim.SGD(
@@ -194,9 +139,6 @@ optimizer = torch.optim.SGD(
     momentum=momentum,
     weight_decay=10**wd
 )
-
-
-# In[17]:
 
 
 def forward(x, model, conv):
@@ -329,9 +271,6 @@ def validate(val_loader, model, reglog, criterion):
     return top1.avg, top5.avg, losses.avg
 
 
-# In[18]:
-
-
 # create logs
 exp_log = os.path.join(exp, 'log')
 if not os.path.isdir(exp_log):
@@ -340,9 +279,6 @@ if not os.path.isdir(exp_log):
 loss_log = Logger(os.path.join(exp_log, 'loss_log'))
 prec1_log = Logger(os.path.join(exp_log, 'prec1'))
 prec5_log = Logger(os.path.join(exp_log, 'prec5'))
-
-
-# In[22]:
 
 
 for epoch in range(epochs):
@@ -367,10 +303,3 @@ for epoch in range(epochs):
         'best_prec1': best_prec1,
         'optimizer' : optimizer.state_dict(),
     }, os.path.join(exp, filename))
-
-
-# In[ ]:
-
-
-
-
