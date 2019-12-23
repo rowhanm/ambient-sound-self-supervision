@@ -2,8 +2,10 @@
 
 <img src="./combined1.jpg">
 <img src="./combined3.jpg">
+#### Full report can be read in the PDF - "Improving_Visual_Recognition_using_Ambient_Sound_for_Supervision.pdf"
 
-### Full report can be read in the PDF - "Improving_Visual_Recognition_using_Ambient_Sound_for_Supervision.pdf"
+#### Original paper can be found - https://arxiv.org/pdf/1608.07017.pdf
+
 
 0. Install requirements from `requirements.txt`
 
