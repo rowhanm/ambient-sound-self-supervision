@@ -7,7 +7,7 @@
 
 ### Original paper can be read here - https://arxiv.org/pdf/1608.07017.pdf
 
-0. Install requirements from `requirements.txt`
+0. Install requirements from requirements.txt
 
 0.1. Install ffmpeg - https://ffmpeg.org/download.html
 
