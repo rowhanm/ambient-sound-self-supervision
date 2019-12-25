@@ -13,7 +13,7 @@
 
 0.2. Download pretrained weights - https://drive.google.com/drive/folders/1dqdUiZIlkR3SiaK8tayLaUR0WejKqsct?usp=sharing
 
-1. Download AudioSet
+1. Download the AudioSet dataset
 `cat utils/eval_segments.csv | bash ./utils/download_audioset.sh`
 
 2. Extract frames and audio separately from AudioSet
