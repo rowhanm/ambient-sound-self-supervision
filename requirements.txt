@@ -7,7 +7,7 @@ librosa==0.7.1
 matplotlib==2.1.0
 numba==0.46.0
 numpy==1.17.3
-opencv-contrib-python==3.4.2.17
+opencv-contrib-python==4.2.0.32
 opencv-python==3.4.2.17
 pandas==0.22.0
 pathlib==1.0.1
